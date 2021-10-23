@@ -1,0 +1,145 @@
+SERVER
+-----------------------------------------------------------------------------------------------------------------------------
+- npm i express apollo-server-express graphql nodemon mongoose
+- apollo-server-express: Server riêng cho graphql
+- express: là middleware để apollo-server-express nó gắn lên
+- mongoose: sử dụng mongoDB
+- cmt là dấu #. 
+- ! là không được phép null. 
+- flow làm việc data (static) -> schema -> resolver-> index.js
+
+query ExampleQuery {
+  books {
+    id
+    name
+    genre
+  }
+}
+
+query ExampleQuery {
+  authors {
+    id
+    name
+    age
+  } 
+}
+
+query ExampleQuery{
+  book(id: 6) {
+    id
+    name
+    genre
+  }
+}
+
+query ExampleQuery{
+  author(id: 1) {
+    id
+    name
+    age
+  }
+}
+
+query ExampleQuery{
+  book(id: 2) {
+    id
+    name
+    genre
+    author {
+      name
+      age
+    }
+  }
+}
+
+// Trong trường hợp cấu trúc dữ liệu data và cấu trúc dữ liệu schema khác nhau
+
+vd: object trong data { id, name,  genre, authorId } còn object trong schema là { id, name, genre, author }. 
+
+Ta thấy bên object của data ts cuối là trả về authorId còn bên object của schema là trả về đối tượng author
+
+Ta sẽ hướng dẫn cho resolver khi nhìn thấy trường author thì nó sẽ trả lại dữ liệu đt Author bằng cách tạo ra 1 resolver mới lấy ra 
+Type Book và field (trường) author. Trong trường author lúc này lúc nào sẽ nhận về parent. console.log(parent) ra để xem. parent này 
+chính là kết quả của cái query cha
+
+Ví dụ flow chạy Vào Type Query -> book: (parent, args) => books.find(book => book.id.toString()  === args.id),  -> book được trả về này chính là parent
+  id: 3
+  name: 'Số đỏ'
+  genre: 'Tiểu thuyết'
+  authorId: 3
+
+Tương tự với type Author {
+        id: ID!
+        name: String
+        age: Int
+        books: [Book]
+    }
+flow chạy Vào Type Query -> author: (parent, args) => authors.find(author => author.id.toString() === args.id) -> author được trả về này chính là parent
+
+query ExampleQuery{
+  book(id: 3) {
+    id
+    name
+    genre
+    author {
+      name
+      age
+    }
+  }
+}
+
+query ExampleQuery{
+  author(id: 3) {  // cấp độ 1
+    id
+    name
+    age
+    books {        // cấp độ 2
+      id
+      name
+      genre
+    }
+  }
+}
+
+query ExampleQuery{
+  book(id: 3) {                 // cấp độ 1
+    id
+    name
+    genre
+    author {                    // cấp độ 2
+      name
+      age
+      books {                   // cấp độ 3
+        name
+        genre
+      }
+    }
+  }
+}
+
+mutation Example($createAuthorId: ID!) {
+  createAuthor(id: 4, name: "Nguyễn Trung Kiên", age: 21) {
+    id
+    name
+    age
+    books {
+      name
+    }
+  }
+}
+
+mutation Example{
+  createBook(id: 7, name: "Liverpool", genre: "Football", authorId: 4) {
+    id
+    name
+    genre
+}
+}
+
+mongoose.connect nhận vào 2 ts:
+1 là chuỗi kết nối
+2 là các option mặc định
+-----------------------------------------------------------------------------------------------------------------------------
+
+CLIENT
+- npm i @apollo/client grapql react-bootstrap bootstrap
